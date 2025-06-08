@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简历评分工具 - 应届生专版</title>
+    <meta name="description" content="专业的应届生简历评分工具，提供详细分析、岗位推荐和改进建议">
+    <meta name="keywords" content="简历评分,简历分析,应届生,求职,岗位推荐">
+    
+    <!-- 预加载关键资源 -->
+    <link rel="preload" href="style.css" as="style">
+    <link rel="preload" href="script.js" as="script">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- 添加 favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+    
+    <!-- CDN 资源 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" 
+            onerror="handleCDNError('pdf')" 
+            async></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" 
+            onerror="handleCDNError('mammoth')" 
+            async></script>
+</head>
+<body>
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="切换主题">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- 语言切换 -->
+    <div class="language-toggle">
+        <button onclick="toggleLanguage()" class="lang-btn">
+            <span id="langText">EN</span>
+        </button>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1 data-lang="title">🎓 应届生简历评分工具</h1>
+            <p data-lang="subtitle">专业评估 • 岗位推荐 • 提升建议</p>
+        </header>
+
+        <!-- 上传区域 -->
+        <section class="upload-section">
+            <div class="upload-card">
+                <h2 data-lang="upload-title">📄 上传简历</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📎</div>
+                    <p data-lang="upload-hint">拖拽文件到此处，或点击选择文件</p>
+                    <p class="upload-hint" data-lang="file-types">支持 PDF、Word 格式，最大 10MB</p>
+                    <input type="file" id="fileInput" accept=".pdf,.doc,.docx" style="display: none;" multiple="false">
+                    <button class="upload-btn" onclick="document.getElementById('fileInput').click()" data-lang="select-file">
+                        选择文件
+                    </button>
+                </div>
+                
+                <div class="divider">
+                    <span data-lang="or">或</span>
+                </div>
+                
+                <div class="text-input">
+                    <h3 data-lang="paste-title">📝 直接粘贴简历内容</h3>
+                    <textarea 
+                        id="resumeText" 
+                        data-lang-placeholder="paste-placeholder"
+                        placeholder="请将简历内容粘贴到这里..."
+                        rows="8"
+                        spellcheck="false"
+                    ></textarea>
+                    <div class="textarea-toolbar">
+                        <span class="char-count" id="charCount">0 字符</span>
+                        <button class="clear-btn" onclick="clearTextarea()" data-lang="clear">清空</button>
+                    </div>
+                    <button class="analyze-btn" onclick="analyzeResume()" disabled data-lang="analyze">
+                        开始分析
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 结果展示区域 -->
+        <section class="result-section" id="resultSection" style="display: none;">
+            <div class="result-card">
+                <!-- 总分展示 -->
+                <div class="score-overview">
+                    <div class="total-score">
+                        <div class="score-circle" id="scoreCircle">
+                            <span class="score-number" id="totalScore">0</span>
+                            <span class="score-suffix" data-lang="score-suffix">分</span>
+                        </div>
+                        <div class="score-info">
+                            <h2 id="scoreLevel" data-lang="evaluating">评估中...</h2>
+                            <p id="scoreSummary" data-lang="analyzing">正在分析您的简历...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="action-buttons">
+                        <button class="export-btn" onclick="exportResults()" data-lang="export">
+                            📥 导出报告
+                        </button>
+                        <button class="share-btn" onclick="shareResults()" data-lang="share">
+                            🔗 分享结果
+                        </button>
+                        <button class="analyze-again-btn" onclick="analyzeAgain()" data-lang="analyze-again">
+                            🔄 重新分析
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 详细评分 -->
+                <div class="detailed-scores">
+                    <h3 data-lang="detailed-scores">📊 详细评分</h3>
+                    <div class="score-categories" id="scoreCategories">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 岗位推荐 -->
+                <div class="job-recommendations">
+                    <h3 data-lang="job-recommendations">🎯 岗位推荐</h3>
+                    <div class="job-list" id="jobList">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 改进建议 -->
+                <div class="suggestions">
+                    <h3 data-lang="suggestions">💡 改进建议</h3>
+                    <div class="suggestion-list" id="suggestionList">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p data-lang="footer">Made with ❤️ for 应届毕业生 | <a href="https://github.com/yourusername/resume-scorer" target="_blank">GitHub</a></p>
+        </footer>
+    </div>
+
+    <!-- 加载提示 -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p id="loadingText" data-lang="loading">正在处理中...</p>
+        </div>
+    </div>
+
+    <!-- Toast 通知 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- 键盘快捷键帮助 -->
+    <div class="keyboard-shortcuts" id="keyboardShortcuts" style="display: none;">
+        <h3>⌨️ 键盘快捷键</h3>
+        <div class="shortcut-list">
+            <div><kbd>Ctrl</kbd> + <kbd>U</kbd> - 上传文件</div>
+            <div><kbd>Ctrl</kbd> + <kbd>Enter</kbd> - 开始分析</div>
+            <div><kbd>Ctrl</kbd> + <kbd>E</kbd> - 导出报告</div>
+            <div><kbd>F1</kbd> - 显示/隐藏快捷键</div>
+            <div><kbd>Esc</kbd> - 关闭弹窗</div>
+        </div>
+    </div>
+
+    <script>
+        // CDN 错误处理
+        function handleCDNError(type) {
+            console.warn(`${type} CDN failed, using fallback`);
+            showToast(`${type} 库加载失败，可能影响部分功能`, 'warning');
+        }
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+    </script>
+    
+    <script src="i18n.js"></script>
+    <script src="resume-parser.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
